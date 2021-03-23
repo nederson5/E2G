@@ -10,7 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace DadJokeService
+namespace DadJokeService.API
 {
     public class Startup
     {
