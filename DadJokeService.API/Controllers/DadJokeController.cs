@@ -21,27 +21,24 @@ namespace DadJokeService.Controllers
             this.client = client;
         }
 
-
-        // GET: api/<DadJokeController>
         [HttpGet("randomJoke")]
-        public async Task<string> RandomJoke()
+        public async Task<RandomJokeResponse> RandomJoke()
         {
             var request = new RestRequest(resource);
             var response = await client.ExecuteGetAsync<RandomJokeResponse>(request);
 
-            jokeCache.Add(response.Data.Id, response.Data.Joke, DateTimeOffset.Now.AddMinutes(20));
+            jokeCache.Add(response.Data.Id, response.Data, DateTimeOffset.Now.AddMinutes(20));
 
-            return response.Data.Joke;
+            return response.Data;
         }
 
-        // GET api/<DadJokeController>/5
         [HttpGet("{id}")]
-        public async Task<string> Get(string id)
+        public async Task<RandomJokeResponse> Get(string id)
         {
             var request = new RestRequest(resource);
             request.Resource = "j/{id}";
             request.AddParameter("id", id, ParameterType.UrlSegment);
-            Func<Task<string>> response = async () => (await client.GetAsync<RandomJokeResponse>(request)).Joke;
+            Func<Task<RandomJokeResponse>> response = async () => (await client.ExecuteGetAsync<RandomJokeResponse>(request)).Data;
 
             var joke = await jokeCache.GetOrAddAsync(id, response);
 

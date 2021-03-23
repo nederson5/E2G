@@ -1,6 +1,7 @@
 ﻿using AutoFixture.Xunit2;
 using DadJokeService.Controllers;
 using DadJokeService.Models;
+using LazyCache;
 using LazyCache.Testing.Moq;
 using Moq;
 using RestSharp;
@@ -14,18 +15,21 @@ namespace DadJokeService.Tests.Unit.Controllers
     {
         [Theory]
         [AutoData]
-        public async Task RandomJoke_JokeExists_RandomJokeReturned(Mock<IRestClient> mockRestClient, Mock<IRestResponse<RandomJokeResponse>> mockResult, RandomJokeResponse expectedResult)
+        public async Task RandomJoke_JokeExists_RandomJokeReturned(Mock<IRestClient> mockRestClient, Mock<IRestResponse<RandomJokeResponse>> mockResponse, RandomJokeResponse expectedResult)
         {
-            var mockCache = Create.MockedCachingService();
-            mockResult.Setup(mock => mock.Data).Returns(expectedResult);
-            mockRestClient.Setup(mock => mock.ExecuteGetAsync<RandomJokeResponse>(It.IsAny<IRestRequest>(), It.IsAny<CancellationToken>())).ReturnsAsync(mockResult.Object);
-            DadJokeController controller = new DadJokeController(mockCache, mockRestClient.Object);
+            mockResponse.Setup(mock => mock.Data).Returns(expectedResult);
+            mockRestClient.Setup(mock => mock.ExecuteGetAsync<RandomJokeResponse>(It.IsAny<IRestRequest>(), It.IsAny<CancellationToken>())).ReturnsAsync(mockResponse.Object);
 
-            var joke = await controller.RandomJoke();
+            var cache = Create.MockedCachingService();
+            DadJokeController controller = new DadJokeController(cache, mockRestClient.Object);
 
-            var actualCache = Mock.Get(mockCache);
+            var response = await controller.RandomJoke();
 
-            Assert.Equal(expectedResult.Joke, joke);
+            var mockCache = Mock.Get(cache);
+            //mockCache.Verify(x => x.)
+            mockResponse.Verify();
+            mockRestClient.Verify(x => x.ExecuteGetAsync<RandomJokeResponse>(It.IsAny<IRestRequest>(), It.IsAny<CancellationToken>()), Times.Once);
+            Assert.Equal(expectedResult.Joke, response.Joke);
         }
     }
 }

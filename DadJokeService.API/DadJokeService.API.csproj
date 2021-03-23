@@ -12,6 +12,7 @@
   <ItemGroup>
     <PackageReference Include="LazyCache.AspNetCore" Version="2.1.3" />
     <PackageReference Include="RestSharp" Version="106.11.7" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.1.1" />
   </ItemGroup>
 
 
